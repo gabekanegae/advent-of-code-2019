@@ -5,8 +5,6 @@
 import AOCUtils
 from collections import deque
 
-moves = [(0, -1), (-1, 0), (0, 1), (1, 0)]
-
 class Tunnels:
     def __init__(self, tunnels):
         self.tunnels = tunnels
@@ -31,6 +29,7 @@ class Tunnels:
         # Dict of dicts with (distance from keyA to keyB, doors inbetween)
         keysToKeys = {k: dict() for k in self.keys}
         
+        # For each key, BFS to find all the others
         for keyA, posKeyA in self.keys.items():
             queue = deque([(posKeyA, 0, [])])
             visited = set()
@@ -51,30 +50,12 @@ class Tunnels:
                     keysToKeys[keyA][keyB] = (dist, newDoors)
                     keysToKeys[keyB][keyA] = (dist, newDoors)
 
-                for m in moves:
+                for m in [(0, -1), (-1, 0), (0, 1), (1, 0)]:
                     step = (cur[0]+m[0], cur[1]+m[1])
-                    stepTile = self.tunnels[step[0]][step[1]]
-                    if stepTile != "#":
+                    if self.tunnels[step[0]][step[1]] != "#":
                         queue.append((step, dist+1, newDoors))
 
         return keysToKeys
-
-    def reachableKeys(self, bots, inventory):
-        reachable = dict()
-        for botID, botPos in enumerate(bots):
-            botTile = self.tunnels[botPos[0]][botPos[1]]
-            if botTile == "@": botTile = botID # Not a key, but a bot
-
-            for keyB, (dist, newDoors) in self.keysToKeys[botTile].items():
-                # If there are locked doors between keyA and keyB, it can't be reached
-                if not set([d.lower() for d in newDoors]).issubset(set(inventory)): continue
-
-                # If keyB is already taken, ignore it
-                if keyB in inventory: continue
-
-                reachable[keyB] = (self.keys[keyB], dist, botID)
-
-        return reachable
 
     def distanceToAllKeys(self):
         memo = dict() # Memoization of distanceToAllKeys given (bots, inventory)
@@ -83,19 +64,31 @@ class Tunnels:
             memoKey = (tuple(sorted(bots)), tuple(sorted(inventory)))
             if memoKey in memo: return memo[memoKey]
 
+            # Calculate all distances to all reachable keys
             distances = []
-            for key, (pos, dist, botID) in self.reachableKeys(bots, inventory).items():
-                if type(key) is int: continue # If not a key but a bot, ignore it
+            for botID, botPos in enumerate(bots):
+                botTile = self.tunnels[botPos[0]][botPos[1]]
+                if botTile == "@": botTile = botID # Not on a key, but at starting position
 
-                # "Teleport" bot to key
-                newBots = bots[:]
-                newBots[botID] = pos
+                for key, (dist, doors) in self.keysToKeys[botTile].items():
+                    # If not a key but a bot, ignore it
+                    if type(key) is int: continue
 
-                # Add key to inventory
-                newInventory = set(inventory) | set(key)
+                    # If key is already taken, ignore it
+                    if key in inventory: continue
 
-                # Add to possible paths (recurse)
-                distances.append(dist + exploreRecursive(newBots, newInventory))
+                    # If there are locked doors between bot and key, it can't be reached
+                    if not set([d.lower() for d in doors]).issubset(inventory): continue
+
+                    # Move bot to key
+                    newBots = bots[:]
+                    newBots[botID] = self.keys[key]
+
+                    # Add key to inventory
+                    newInventory = inventory | set(key)
+
+                    # Add to possible paths (recurse)
+                    distances.append(dist + exploreRecursive(newBots, newInventory))
 
             # If no keys are reachable, minDistance is 0
             minDistance = min(distances) if distances else 0
@@ -122,8 +115,8 @@ print("Part 1: {}".format(tunnels.distanceToAllKeys()))
 pos = tunnels.bots[0]
 for w in [(-1, 0), (0, 0), (1, 0), (0, -1), (0, 1)]:
     rawTunnels[pos[0]+w[0]][pos[1]+w[1]] = "#"
-for p in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
-    rawTunnels[pos[0]+p[0]][pos[1]+p[1]] = "@"
+for b in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+    rawTunnels[pos[0]+b[0]][pos[1]+b[1]] = "@"
 
 tunnels = Tunnels(rawTunnels)
 print("Part 2: {}".format(tunnels.distanceToAllKeys()))
