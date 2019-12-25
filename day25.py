@@ -3,6 +3,7 @@
 ##############################
 
 import AOCUtils
+from itertools import combinations
 
 class VM:
     def __init__(self, memory, pc=0, base=0):
@@ -121,10 +122,12 @@ memory = [int(i) for i in rawProgram.split(",")]
 
 # vm = VM(memory)
 # vm.run()
-# while True:
+# print("".join([chr(c) for c in vm.output]))
+# while not vm.halted:
+#     vm.run(input()+"\n")
 #     print("".join([chr(c) for c in vm.output]))
 #     vm.output = []
-#     vm.run(input()+"\n")
+# exit()
 
 save = ["north",
 "take easter egg",
@@ -155,36 +158,45 @@ items = [s[5:] for s in save if s.startswith("take")]
 
 tooHeavy = [] # Store all sets of items that are too heavy (can't be a subset of the answer)
 
+# Start game, run command list collecting all items and drop them before the sensitive floor
 vm = VM(memory)
 vm.run("\n".join(save[:-1])+"\n")
 vm.run("\n".join(["drop "+item for item in items])+"\n")
 
-# Bruteforces the pressure floor by trying all item combinations
-for i in range(1, 2**len(items)-1):
-    pick = [int(i) for i in "{:08b}".format(i)]
-    pickedItems = [item for i, item in enumerate(items) if pick[i]]
-    # print("Trying items: {}".format(pickedItems))
+# Bruteforce the pressure floor by trying all item combinations
+curItems = set()
+done = False
+for n in range(len(items)+1): # Try combinations by increasing length
+    if done: break
+    for pickedItems in combinations(items, n):
+        # print("Trying items: {}".format(list(pickedItems)))
 
-    # Check against the invalid subsets, faster than doing it in-game
-    if any([set(s).issubset(set(pickedItems)) for s in tooHeavy]): continue
+        # Check against the invalid subsets, faster than doing it in-game
+        if any([set(s).issubset(set(pickedItems)) for s in tooHeavy]): continue
 
-    # Pick up all selected items
-    vm.run("\n".join(["take "+item for item in pickedItems])+"\n")
-    
-    # Activate floor
-    vm.run(save[-1]+"\n")
+        # Drop all items that aren't part of pickedItems
+        toDrop = [item for item in curItems if item not in pickedItems]
+        vm.run("\n".join(["drop "+item for item in toDrop])+"\n")
+        curItems = curItems.difference(set(toDrop))
 
-    # Verify result
-    output = "".join([chr(c) for c in vm.output])
-    if output.find("Alert!") == -1:
-        # print(output)
-        print("Part 1: {}".format(output[-43:-37]))
-        break
-    elif output.find("lighter") != -1: # Too heavy, add as invalid subset
-        tooHeavy.append(pickedItems)
+        # Pick up all from pickedItems that it doesn't have yet
+        toPick = [item for item in pickedItems if item not in curItems]
+        vm.run("\n".join(["take "+item for item in toPick])+"\n")
+        curItems = curItems.union(set(toPick))
 
-    # Drop all items that were picked up
-    vm.run("\n".join(["drop "+item for item in pickedItems])+"\n")
-    vm.output = []
+        # Activate floor
+        vm.run(save[-1]+"\n")
+
+        # Verify result
+        output = "".join([chr(c) for c in vm.output])
+        if output.find("Alert!") == -1:
+            # print(output)
+            print("Part 1: {}".format(output.split()[-8]))
+            done = True
+            break
+        elif output.find("lighter") != -1: # Too heavy, add as invalid subset
+            tooHeavy.append(pickedItems)
+
+        vm.output = []
 
 AOCUtils.printTimeTaken()
