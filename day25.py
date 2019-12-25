@@ -153,6 +153,8 @@ save = ["north",
 
 items = [s[5:] for s in save if s.startswith("take")]
 
+tooHeavy = [] # Store all sets of items that are too heavy (can't be a subset of the answer)
+
 vm = VM(memory)
 vm.run("\n".join(save[:-1])+"\n")
 vm.run("\n".join(["drop "+item for item in items])+"\n")
@@ -160,11 +162,14 @@ vm.run("\n".join(["drop "+item for item in items])+"\n")
 # Bruteforces the pressure floor by trying all item combinations
 for i in range(1, 2**len(items)-1):
     pick = [int(i) for i in "{:08b}".format(i)]
-    picked = [item for i, item in enumerate(items) if pick[i]]
-    # print("Trying items: {}".format(picked))
+    pickedItems = [item for i, item in enumerate(items) if pick[i]]
+    # print("Trying items: {}".format(pickedItems))
+
+    # Check against the invalid subsets, faster than doing it in-game
+    if any([set(s).issubset(set(pickedItems)) for s in tooHeavy]): continue
 
     # Pick up all selected items
-    vm.run("\n".join(["take "+item for item in picked])+"\n")
+    vm.run("\n".join(["take "+item for item in pickedItems])+"\n")
     
     # Activate floor
     vm.run(save[-1]+"\n")
@@ -175,9 +180,11 @@ for i in range(1, 2**len(items)-1):
         # print(output)
         print("Part 1: {}".format(output[-43:-37]))
         break
+    elif output.find("lighter") != -1: # Too heavy, add as invalid subset
+        tooHeavy.append(pickedItems)
 
     # Drop all items that were picked up
-    vm.run("\n".join(["drop "+item for item in picked])+"\n")
+    vm.run("\n".join(["drop "+item for item in pickedItems])+"\n")
     vm.output = []
 
 AOCUtils.printTimeTaken()
