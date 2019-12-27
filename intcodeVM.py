@@ -1,5 +1,3 @@
-import AOCUtils
-
 OP_READ, OP_WRITE = False, True
 
 class VM:
@@ -27,34 +25,36 @@ class VM:
             elif mode == 2: return self.base+data
 
     def __getInput(self):
+        # Read from inputBuffer, increment inputPtr
         if self.inputPtr < len(self.inputBuffer):
             self.inputPtr += 1
             return self.inputBuffer[self.inputPtr-1]
-        else:
-            return None
 
     def __getitem__(self, pos):
         if pos < 0: raise Exception("Can't acess negative memory address ({}).".format(pos))
 
-        if pos >= len(self.memory): # Extends memory to fit data request
+        if pos >= len(self.memory): # Extend memory to fit data request
             self.memory += [0 for _ in range(pos+1-len(self.memory))]
         return self.memory[pos]
 
     def __setitem__(self, pos, data):
         if pos < 0: raise Exception("Can't acess negative memory address ({}).".format(pos))
 
-        if pos >= len(self.memory): # Extends memory to fit data request
+        if pos >= len(self.memory): # Extend memory to fit data request
             self.memory += [0 for _ in range(pos+1-len(self.memory))]
         self.memory[pos] = data
 
     def run(self, inputValue=None):
         # Load input into inputBuffer
-        if type(inputValue) is list:
-            self.inputBuffer += inputValue # Assumes list of ints
-        elif type(inputValue) is str:
-            self.inputBuffer += [ord(c) for c in inputValue]
-        elif inputValue is not None:
-            self.inputBuffer.append(int(inputValue))
+        try:
+            if type(inputValue) is list:
+                self.inputBuffer += [int(i) for i in inputValue]
+            elif type(inputValue) is str:
+                self.inputBuffer += [ord(c) for c in inputValue]
+            elif inputValue is not None:
+                self.inputBuffer.append(int(inputValue))
+        except:
+            raise TypeError("Couldn't parse input given.")
 
         # Run VM
         while self.pc < len(self.memory):
