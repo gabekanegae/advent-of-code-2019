@@ -37,7 +37,10 @@ class MoonSystem:
 
     def getState(self, c): return str([moon.getState(c) for moon in self.moons])
 
+# Get LCM of 2 values
 def lcm2(x, y): return abs(x*y)//gcd(x,y)
+
+# Get LCM of a list of N values
 def lcmN(a):
     l = lcm2(a[0], a[1])
     for i in a[2:]: l = lcm2(l, i)
@@ -54,8 +57,9 @@ for step in range(1000):
 
 print("Part 1: {}".format(system.getTotalEnergy()))
 
-periods = [0, 0, 0]
-seen = [set(), set(), set()]
+# Find periods of each axis
+periods = [0 for _ in range(3)]
+seen = [set() for _ in range(3)]
 
 system = MoonSystem(moons)
 step = 0
@@ -71,6 +75,7 @@ while not all(periods):
     system.step()
     step += 1
 
+# Get LCM of all periods
 print("Part 2: {}".format(lcmN(periods)))
 
 AOCUtils.printTimeTaken()

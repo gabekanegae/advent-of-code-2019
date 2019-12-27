@@ -48,6 +48,7 @@ for recipe in rawRecipes:
 
 print("Part 1: {}".format(makeFuel(recipes, 1)))
 
+# Binary Search
 lo, hi = 1, 10**9
 while hi > lo+1:
     mid = (hi+lo)//2
@@ -55,6 +56,7 @@ while hi > lo+1:
         hi = mid
     else:
         lo = mid
+
 print("Part 2: {}".format(lo))
 
 AOCUtils.printTimeTaken()

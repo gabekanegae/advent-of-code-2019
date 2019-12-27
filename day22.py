@@ -30,6 +30,8 @@ for step in shuffle:
 card = 2019
 print("Part 1: {}".format(deck.index(card)))
 
+# Define deck by (offset, increment, size)
+# Position of card N can be taken by ((offset + increment * N) % size)
 size = 119315717514047
 offset, increment = 0, 1
 for step in shuffle:

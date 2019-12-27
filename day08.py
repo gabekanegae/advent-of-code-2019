@@ -31,8 +31,6 @@ checksum = layerCounts[0][1] * layerCounts[0][2]
 
 print("Part 1: {}".format(checksum))
 
-print("Part 2:")
-
 image = [[None for _ in range(w)] for _ in range(h)]
 for i in range(h):
     for j in range(w):
@@ -40,9 +38,13 @@ for i in range(h):
             if image[i][j] is None and layer[i][j] != 2:
                 image[i][j] = layer[i][j]
 
+print("Part 2:")
 for i in range(h):
     for j in range(w):
-        print("O" if image[i][j] == 1 else " ", end="")
+        if image[i][j] == 1:
+            print("##", end="")
+        else:
+            print("  ", end="")
     print()
 
 AOCUtils.printTimeTaken()
