@@ -36,7 +36,8 @@ vm = VM(memory)
 vm.run()
 
 # Store the command list that reaches the final room with the maximum amount of items
-maxInventorySize, maxInventoryState = 0, None
+finalState = None
+maxItemsFound = 0
 
 # BFS through all rooms, storing (room, inventory) visited states
 visited = set()
@@ -50,7 +51,7 @@ while queue:
 
     # Get room name
     room = text.split("==")[1].strip()
-    # print(room, "-->", sorted(inventory))
+    # print(sum([p.split()[0] != "take" for p in path]), room, "-->", sorted(inventory))
 
     if (room, tuple(inventory)) in visited: continue
     visited.add((room, tuple(inventory)))
@@ -64,19 +65,24 @@ while queue:
     if itemsStart != -1:
         items = [line[2:] for line in text[itemsStart:].split("\n") if line.startswith("-")]
 
-    # If at Security Checkpoint (final room before floor)
-    if room == "Security Checkpoint":
-        if len(inventory) > maxInventorySize: # Update best answer (vm, inventory, floorDirection)
-            floorDirection = [door for door in doors if door not in [path[-1], oppositeDoor(path[-1])]][0]
-            maxInventorySize, maxInventoryState = len(inventory), (vm, list(inventory), floorDirection)
-        doors = [oppositeDoor(path[-1])] # Only go back, don't go to the pressure-sensitive floor
-    
-    # Pick up all items on the floor
+    # Pick up all items in the room
     for item in items:
         if item in blacklist: continue # But ignore the game-ending ones
         path.append("take " + item)
         vm.run("take " + item + "\n")
         inventory.add(item)
+
+    # Update maximum amount of items found
+    maxItemsFound = max(maxItemsFound, len(inventory))
+    # If less than that, then as this is a BFS, this pathing missed an item, so ignore it
+    if len(inventory) < maxItemsFound: continue
+
+    # If at final room before floor, save as possible answer and ignore this pathing
+    if room == "Security Checkpoint":
+        # Get step to reach floor
+        floorDirection = [door for door in doors if door not in [path[-1], oppositeDoor(path[-1])]][0]
+        finalState = (vm, list(inventory), floorDirection)
+        continue
 
     # Queue all next steps, copying the current VM for each one
     for door in doors:
@@ -86,48 +92,46 @@ while queue:
         queue.append((set(inventory), path+[door], newVM))
 
 # Get VM at the checkpoint, list of all safe items and direction of pressure-sensitive floor
-vm, allItems, floorDirection = maxInventoryState
+vm, allItems, floorDirection = finalState
+vm.run("\n".join(["drop "+item for item in allItems])+"\n") # Drop all items
 
-# Store all sets of items that are too heavy (can't be a subset of the final answer)
-tooHeavy = []
+# Generate all possible item combinations by increasing length
+itemCombinations = []
+for n in range(len(allItems)):
+    itemCombinations += list(combinations(allItems, n))
 
-# Drop all items before going on the floor
-vm.run("\n".join(["drop "+item for item in allItems])+"\n")
-
-# Bruteforce the pressure floor by trying all item combinations
+# Bruteforce the pressure floor by trying all of the combinations 
 inventory = set()
-done = False
-for n in range(len(allItems)): # Try combinations by increasing length
-    if done: break
-    for attemptItems in combinations(allItems, n):
-        # print("Trying items: {}".format(list(attemptItems)))
+tooHeavy = []
+for attemptItems in itemCombinations:
+    # print("Trying items: {}".format(list(attemptItems)))
 
-        # Check against the invalid subsets, faster than doing it in-game
-        if any([set(s).issubset(set(attemptItems)) for s in tooHeavy]): continue
+    # If inventory is a superset of any of tooHeavy, then it's also going to be too heavy
+    if any([set(s).issubset(set(attemptItems)) for s in tooHeavy]): continue
 
-        # Drop all items that aren't in attemptItems
-        toDrop = [item for item in inventory if item not in attemptItems]
-        vm.run("\n".join(["drop "+item for item in toDrop])+"\n")
-        inventory = inventory.difference(set(toDrop))
+    # Drop all items that aren't in attemptItems
+    toDrop = [item for item in inventory if item not in attemptItems]
+    vm.run("\n".join(["drop "+item for item in toDrop])+"\n")
+    inventory = inventory.difference(set(toDrop))
 
-        # Pick up all from attemptItems that aren't yet in inventory
-        toPick = [item for item in attemptItems if item not in inventory]
-        vm.run("\n".join(["take "+item for item in toPick])+"\n")
-        inventory = inventory.union(set(toPick))
+    # Pick up all from attemptItems that aren't yet in inventory
+    toPick = [item for item in attemptItems if item not in inventory]
+    vm.run("\n".join(["take "+item for item in toPick])+"\n")
+    inventory = inventory.union(set(toPick))
 
-        # Activate floor
-        vm.run(floorDirection+"\n")
+    # Activate floor
+    vm.run(floorDirection+"\n")
 
-        # Verify result
-        output = "".join([chr(c) for c in vm.output])
-        if output.find("Alert!") == -1:
-            # print(output)
-            print("Part 1: {}".format(output.split()[-8]))
-            done = True
-            break
-        elif output.find("lighter") != -1: # Too heavy, add as invalid subset
-            tooHeavy.append(attemptItems)
+    text = "".join([chr(c) for c in vm.output])
+    vm.output = []
 
-        vm.output = []
+    # Verify result
+    if text.find("Alert!") == -1:
+        # print(text.split("\n\n")[-1].strip())
+        print("Part 1: {}".format(text.split()[-8]))
+        done = True
+        break
+    elif text.find("lighter") != -1: # Too heavy, add as invalid subset
+        tooHeavy.append(attemptItems)
 
 AOCUtils.printTimeTaken()
