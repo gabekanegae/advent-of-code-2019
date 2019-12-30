@@ -108,7 +108,7 @@ def compressPath(path):
             newElement = main[curPos]
 
             # If the element is a function, then this is invalid 
-            if main[curPos] in funcNames: break
+            if newElement in funcNames: break
 
             curFunc += [newElement]
             curPos += 1
@@ -121,8 +121,8 @@ def compressPath(path):
             newFuncs = funcs + [curFunc]
 
             solution = recursiveCompress(newMain, newFuncs)
-            if solution:
-                return solution
+            if solution: return solution
+
         return None
 
     return recursiveCompress(path, [])
@@ -134,14 +134,12 @@ memory = [int(i) for i in rawProgram.split(",")]
 
 vm = VM(memory)
 vm.run()
-
 cam = "".join([chr(c) for c in vm.output]).split()
-botcam = BotCam(cam)
 
+botcam = BotCam(cam)
 print("Part 1: {}".format(botcam.sumIntersections()))
 
 path = botcam.getPath()
-
 main, A, B, C = compressPath(path)
 videoFeed = "n"
 
