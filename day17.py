@@ -70,19 +70,62 @@ class BotCam:
     #     return s
 
 def formatInput(s): return ",".join([str(c) for c in s])
-def countSub(l, s): return sum([l[i:i+len(s)] == s for i in range(len(l))])
 
-def replaceSub(l, f, r):
+def findAndReplace(l, f, r):
     nl = []
     i = 0
     while i < len(l):
         if l[i:i+len(f)] == f:
-            nl.append("ABC"[r])
+            nl.append(r)
             i += len(f)
         else:
             nl.append(l[i])
             i += 1
     return nl
+
+def compressPath(path):
+    funcNames = list("ABC")
+
+    # Recursive backtracking approach
+    def recursiveCompress(main, funcs):
+        # If we have three functions, do not recurse anymore
+        if len(funcs) == 3:
+            # If main is short enough and fully compressed, return answer
+            if len(formatInput(main)) <= 20 and all([c in funcNames for c in main]):
+                main = formatInput(main)
+                A, B, C = [formatInput(f) for f in funcs]
+                return main, A, B, C
+            return None
+
+        # Skip to uncompressed portion of path
+        curPos = 0
+        while main[curPos] in funcNames: curPos += 1
+
+        # Find next function to consider
+        curFunc = []
+        while True:
+            # Next element to add to the current function
+            newElement = main[curPos]
+
+            # If the element is a function, then this is invalid 
+            if main[curPos] in funcNames: break
+
+            curFunc += [newElement]
+            curPos += 1
+
+            # If formatted function is longer than 20, also invalid
+            if len(formatInput(curFunc)) > 20: break
+
+            # Replace in main, add to function list and recurse
+            newMain = findAndReplace(main, curFunc, funcNames[len(funcs)])
+            newFuncs = funcs + [curFunc]
+
+            solution = recursiveCompress(newMain, newFuncs)
+            if solution:
+                return solution
+        return None
+
+    return recursiveCompress(path, [])
 
 ##################################
 
@@ -99,32 +142,7 @@ print("Part 1: {}".format(botcam.sumIntersections()))
 
 path = botcam.getPath()
 
-main = path[:]
-funcs = []
-for i in range(3):
-    lastGoodFunc = []
-    curFunc = []
-
-    curPos = 0
-    while main[curPos] in "ABC": curPos += 1
-
-    while True:
-        curFunc += main[curPos:curPos+2]
-        curPos += 2
-        
-        # Formatted input can't be longer than 20
-        if len(formatInput(curFunc)) > 20: break
-        
-        # Assumes that each function will appear at least thrice
-        if countSub(main, curFunc) < 3: break
-
-        lastGoodFunc = curFunc[:]
-
-    main = replaceSub(main, lastGoodFunc, i)
-    funcs.append(lastGoodFunc)
-
-main = formatInput(main)
-A, B, C = [formatInput(f) for f in funcs]
+main, A, B, C = compressPath(path)
 videoFeed = "n"
 
 vm = VM(memory)
