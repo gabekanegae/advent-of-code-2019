@@ -53,8 +53,10 @@ while queue:
     room = text.split("==")[1].strip()
     # print(sum([p.split()[0] != "take" for p in path]), room, "-->", sorted(inventory))
 
-    if (room, tuple(inventory)) in visited: continue
-    visited.add((room, tuple(inventory)))
+    # Ignore if already visited, also marks (room, inventory) as visited
+    visKey = (room, tuple(sorted(inventory)))
+    if visKey in visited: continue
+    visited.add(visKey)
 
     # Parse room's doors and items
     doors, items = [], []
@@ -72,6 +74,10 @@ while queue:
         vm.run("take " + item + "\n")
         inventory.add(item)
 
+    # After picking items, mark new (room, inventory) as visited also
+    visKey = (room, tuple(sorted(inventory)))
+    visited.add(visKey)
+
     # Update maximum amount of items found
     maxItemsFound = max(maxItemsFound, len(inventory))
     # If less than that, then as this is a BFS, this pathing missed an item, so ignore it
@@ -80,7 +86,7 @@ while queue:
     # If at final room before floor, save as possible answer and ignore this pathing
     if room == "Security Checkpoint":
         # Get step to reach floor
-        floorDirection = [door for door in doors if door not in [path[-1], oppositeDoor(path[-1])]][0]
+        floorDirection = doors[0] if doors[0] != oppositeDoor(path[-1]) else doors[1]
         finalState = (vm, list(inventory), floorDirection)
         continue
 
