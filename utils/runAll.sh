@@ -12,6 +12,4 @@ for i in $(seq -f "%02g" 1 25); do
     else
         python3 day$i.py
     fi
-    
-    rm .day$i.tmp
 done
