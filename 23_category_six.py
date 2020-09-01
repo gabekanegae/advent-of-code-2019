@@ -41,9 +41,12 @@ while True:
                 if not p1done:
                     print("Part 1: {}".format(y))
                     p1done = True
-                nat = (x, y) # Update NAT
+                
+                # Update NAT
+                nat = (x, y)
             else:
                 queues[dest] += [x, y]
+
         vm.output = []
 
     # NAT

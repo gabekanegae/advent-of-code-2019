@@ -46,7 +46,7 @@ for y in range(100, 10000): # Skip first 100 lines
         # Go along bottom edge of beam (bottom-left square)
         if check(memory, x, y) == 1:
             if check(memory, x+99, y-99) == 1: # Check top-right square
-                result = 10000*x+(y-99) # Result is top-left square
+                result = 10000*x + (y-99) # Result is top-left square
             x0 = x
             break
 

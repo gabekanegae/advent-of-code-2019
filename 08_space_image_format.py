@@ -9,7 +9,7 @@ import AOCUtils
 w, h = 25, 6
 image = [int(i) for i in str(AOCUtils.loadInput(8))]
 
-layerAmt = int(len(image) / (w*h))
+layerAmt = len(image) // (w*h)
 
 layers = []
 layerCounts = []

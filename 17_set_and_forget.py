@@ -33,6 +33,7 @@ class BotCam:
             newFace = (faces.index(self.botFacing)+1) % len(faces)
         elif direction == "L":
             newFace = (faces.index(self.botFacing)-1) % len(faces)
+
         return faces[newFace]
 
     def getPath(self):
@@ -51,6 +52,7 @@ class BotCam:
             for k, v in nxtTile.items():
                 if not (0 <= self.botPos[0]+v[0] < self.size[0]): continue
                 if not (0 <= self.botPos[1]+v[1] < self.size[1]): continue
+
                 if self.cam[self.botPos[0]+v[0]][self.botPos[1]+v[1]] == "#":
                     nxtStep[k] = (self.botPos[0]+v[0], self.botPos[1]+v[1])
 
@@ -75,7 +77,8 @@ class BotCam:
     #         s += "".join(line) + "\n"
     #     return s
 
-def formatInput(s): return ",".join(str(c) for c in s)
+def formatInput(s):
+    return ",".join(str(c) for c in s)
 
 def findAndReplace(l, f, r):
     nl = []

@@ -21,7 +21,7 @@ def countInLOS(station, asteroids, size):
 
 ######################################
 
-rawAsteroids = [s for s in AOCUtils.loadInput(10)]
+rawAsteroids = AOCUtils.loadInput(10)
 size = (len(rawAsteroids), len(rawAsteroids[0]))
 
 asteroids = set()
