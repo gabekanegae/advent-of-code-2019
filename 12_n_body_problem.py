@@ -8,10 +8,10 @@ from math import gcd
 class Moon:
     def __init__(self, rawPos, vel=None):
         self.pos = [int(c.split("=")[1]) for c in rawPos[1:-1].split(",")]
-        self.vel = vel
-        if self.vel is None: self.vel = [0, 0, 0]
+        self.vel = vel or [0, 0, 0]
 
-    def getState(self, c): return (self.pos[c], self.vel[c])
+    def getState(self, c):
+        return (self.pos[c], self.vel[c])
 
 class MoonSystem:
     def __init__(self, moons):
@@ -31,19 +31,23 @@ class MoonSystem:
                 mooni.pos[c] += mooni.vel[c]
 
     def getTotalEnergy(self):
-        pot = [sum([abs(x) for x in moon.pos]) for moon in self.moons]
-        kin = [sum([abs(x) for x in moon.vel]) for moon in self.moons]
-        return sum([p*k for p, k in zip(pot, kin)])
+        pot = [sum(abs(x) for x in moon.pos) for moon in self.moons]
+        kin = [sum(abs(x) for x in moon.vel) for moon in self.moons]
+        return sum(p*k for p, k in zip(pot, kin))
 
-    def getState(self, c): return str([moon.getState(c) for moon in self.moons])
+    def getState(self, c):
+        return str([moon.getState(c) for moon in self.moons])
 
 # Get LCM of 2 values
-def lcm2(x, y): return abs(x*y)//gcd(x,y)
+def lcm2(x, y):
+    return abs(x*y) // gcd(x,y)
 
 # Get LCM of a list of N values
 def lcmN(a):
     l = lcm2(a[0], a[1])
-    for i in a[2:]: l = lcm2(l, i)
+    for i in a[2:]:
+        l = lcm2(l, i)
+    
     return l
 
 ######################################
@@ -52,7 +56,7 @@ rawMoons = AOCUtils.loadInput(12)
 moons = [Moon(rawMoon) for rawMoon in rawMoons]
 
 system = MoonSystem(moons)
-for step in range(1000):
+for _ in range(1000):
     system.step()
 
 print("Part 1: {}".format(system.getTotalEnergy()))

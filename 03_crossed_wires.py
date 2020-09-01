@@ -8,8 +8,8 @@ import AOCUtils
 
 wires = [w.split(",") for w in AOCUtils.loadInput(3)]
 
-wirePaths = [set() for _ in range(len(wires))]
-wirePathsLength = [dict() for _ in range(len(wires))]
+wirePaths = [set() for wire in wires]
+wirePathsLength = [dict() for wire in wires]
 
 moves = {"R": (1, 0), "L": (-1, 0), "U": (0, 1), "D": (0, -1)}
 
@@ -39,7 +39,7 @@ distances = [abs(p[0]) + abs(p[1]) for p in intersections]
 print("Part 1: {}".format(min(distances)))
 
 # Calculate distance sum to every intersection and take min
-intersectionsSteps = [sum([wl[i] for wl in wirePathsLength]) for i in intersections]
+intersectionsSteps = [sum(wl[i] for wl in wirePathsLength) for i in intersections]
 print("Part 2: {}".format(min(intersectionsSteps)))
 
 AOCUtils.printTimeTaken()

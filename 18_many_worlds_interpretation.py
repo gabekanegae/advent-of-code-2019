@@ -17,15 +17,15 @@ class Tunnels:
                 if tunnels[x][y] == "@":
                     self.keys[len(self.bots)] = (x, y)
                     self.bots.append((x, y))
-                elif self.__isKey(tunnels[x][y]):
+                elif self._isKey(tunnels[x][y]):
                     self.keys[tunnels[x][y]] = (x, y)
 
-        self.keysToKeys = self.__getKeysToKeysDistance()
+        self.keysToKeys = self._getKeysToKeysDistance()
 
-    def __isDoor(self, tile): return "A" <= tile <= "Z"
-    def __isKey(self, tile): return "a" <= tile <= "z"
+    def _isDoor(self, tile): return "A" <= tile <= "Z"
+    def _isKey(self, tile): return "a" <= tile <= "z"
 
-    def __getKeysToKeysDistance(self):
+    def _getKeysToKeysDistance(self):
         # Dict of dicts with (distance from keyA to keyB, doors inbetween)
         keysToKeys = {k: dict() for k in self.keys}
         
@@ -42,11 +42,11 @@ class Tunnels:
                 visited.add(cur)
 
                 newDoors = doors[:]
-                if self.__isDoor(curTile):
+                if self._isDoor(curTile):
                     newDoors.append(curTile)
 
                 keyB = curTile
-                if keyB != keyA and self.__isKey(keyB):
+                if keyB != keyA and self._isKey(keyB):
                     keysToKeys[keyA][keyB] = (dist, newDoors)
                     keysToKeys[keyB][keyA] = (dist, newDoors)
 
@@ -78,7 +78,7 @@ class Tunnels:
                     if key in inventory: continue
 
                     # If there are locked doors between bot and key, it can't be reached
-                    if not set([d.lower() for d in doors]).issubset(inventory): continue
+                    if not set(d.lower() for d in doors).issubset(inventory): continue
 
                     # Move bot to key
                     newBots = bots[:]

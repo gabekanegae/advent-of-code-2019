@@ -7,7 +7,8 @@ from intcodeVM import VM
 
 def runSpringScript(memory, script):
     vm = VM(memory)
-    vm.run("\n".join(script)+"\n")
+    vm.run("\n".join(script) + "\n")
+
     return vm.output[-1]
 
 #########################################
@@ -40,7 +41,8 @@ script2 = [
 "OR H J",   # J = E | H
 "AND T J",  # J = !(A & B & C) & (E | H)
 "AND D J",  # J = !(A & B & C) & (E | H) & D
-"RUN"]
+"RUN"
+]
 
 print("Part 2: {}".format(runSpringScript(memory, script2)))
 

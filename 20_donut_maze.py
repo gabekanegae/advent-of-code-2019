@@ -14,7 +14,7 @@ class Maze:
         rawInner, rawOuter = dict(), dict()
         for y in range(self.size[0]):
             for x in range(self.size[1]):
-                portalName, portalPos = self.__parsePortal((y, x))
+                portalName, portalPos = self._parsePortal((y, x))
                 if not portalName or not portalPos: continue
 
                 if portalName == "AA":
@@ -30,33 +30,33 @@ class Maze:
         self.outerPortals = {v: rawInner[k] for k, v in rawOuter.items()}
         self.innerPortals = {v: rawOuter[k] for k, v in rawInner.items()}
 
-    def __isPortal(self, pos):
+    def _isPortal(self, pos):
         return 0 <= pos[0] <= self.size[0] and 0 <= pos[1] <= self.size[1] and "A" <= self.maze[pos[0]][pos[1]] <= "Z"
-    def __isWalkable(self, pos):
+    def _isWalkable(self, pos):
         return 0 <= pos[0] <= self.size[0] and 0 <= pos[1] <= self.size[1] and self.maze[pos[0]][pos[1]] == "."
 
-    def __parsePortal(self, pos):
-        if not self.__isPortal(pos): return None, None
+    def _parsePortal(self, pos):
+        if not self._isPortal(pos): return None, None
         
         y, x = pos
         name, pos = None, None
-        if self.__isPortal((y+1, x)): # Vertical (top-to-bottom)
+        if self._isPortal((y+1, x)): # Vertical (top-to-bottom)
             name = self.maze[y][x] + self.maze[y+1][x]
 
             # Find portal entrance
-            if self.__isWalkable((y-1, x)): # Up
+            if self._isWalkable((y-1, x)): # Up
                 pos = (y-1, x)
-            elif self.__isWalkable((y+2, x)): # Down
+            elif self._isWalkable((y+2, x)): # Down
                 pos = (y+2, x)
 
             self.maze[y][x], self.maze[y+1][x] = " ", " " # Erase portal
-        elif self.__isPortal((y, x+1)): # Horizontal (left-to-right)
+        elif self._isPortal((y, x+1)): # Horizontal (left-to-right)
             name = self.maze[y][x] + self.maze[y][x+1]
 
             # Find portal entrance
-            if self.__isWalkable((y, x-1)): # Left
+            if self._isWalkable((y, x-1)): # Left
                 pos = (y, x-1)
-            elif self.__isWalkable((y, x+2)): # Right
+            elif self._isWalkable((y, x+2)): # Right
                 pos = (y, x+2)
 
             self.maze[y][x], self.maze[y][x+1] = " ", " " # Erase portal
@@ -82,7 +82,7 @@ class Maze:
             
             for m in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
                 step = (cur[0]+m[0], cur[1]+m[1])
-                if self.__isWalkable(step):
+                if self._isWalkable(step):
                     queue.append((step, dist+1))
 
         return dist
@@ -108,7 +108,7 @@ class Maze:
 
             for m in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
                 step = (cur[0]+m[0], cur[1]+m[1])
-                if self.__isWalkable(step):
+                if self._isWalkable(step):
                     queue.append((step, level, dist+1))
 
         return dist

@@ -4,13 +4,14 @@
 
 import AOCUtils
 
-def reqFuel(m): return (m//3)-2
+def reqFuel(m):
+    return (m // 3) - 2
 
 #####################################################
 
 masses = AOCUtils.loadInput(1)
 
-fuelSum = sum([reqFuel(m) for m in masses])
+fuelSum = sum(reqFuel(m) for m in masses)
 print("Part 1: {}".format(fuelSum))
 
 fuelSum = 0

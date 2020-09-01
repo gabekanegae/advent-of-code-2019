@@ -21,9 +21,9 @@ for l in range(layerAmt):
 
     layers.append(layer)
 
-    lc0 = sum([l.count(0) for l in layer])
-    lc1 = sum([l.count(1) for l in layer])
-    lc2 = sum([l.count(2) for l in layer])
+    lc0 = sum(l.count(0) for l in layer)
+    lc1 = sum(l.count(1) for l in layer)
+    lc2 = sum(l.count(2) for l in layer)
     layerCounts.append((lc0, lc1, lc2))
 
 layerCounts.sort()

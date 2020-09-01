@@ -18,7 +18,7 @@ while True:
     for x in range(size[0]):
         for y in range(size[1]):
             if layout[x][y] == "#":
-                bioRating += 2**(x*size[1] + y)
+                bioRating += 2 ** (x*size[1] + y)
 
     if bioRating in seen: break
     seen.add(bioRating)
@@ -43,7 +43,7 @@ print("Part 1: {}".format(bioRating))
 
 # Each iteration will spread bugs to, at most, +1 upper and +1 lower level
 iterations = 200
-levels = iterations//2
+levels = iterations // 2
 
 # Convert list of lists to dict
 layout = dict()
@@ -90,7 +90,7 @@ for x in range(size[0]):
 for i in range(iterations):
     newLayout = dict()
     for k, v in layout.items():
-        aliveNeighbors = sum([layout[neighbor] == "#" for neighbor in neighbors[k]])
+        aliveNeighbors = sum(layout[neighbor] == "#" for neighbor in neighbors[k])
 
         if v == "#" and aliveNeighbors != 1:
             newLayout[k] = "."
@@ -102,7 +102,7 @@ for i in range(iterations):
     layout = newLayout
 
 # Count bugs
-bugAmt = sum([v == "#" for v in layout.values()])
+bugAmt = sum(v == "#" for v in layout.values())
 print("Part 2: {}".format(bugAmt))
 
 AOCUtils.printTimeTaken()

@@ -10,11 +10,11 @@ from collections import deque
 def playGame(memory):
     vm = VM(memory)
     vm.run()
-    print("".join([chr(c) for c in vm.output]))
+    print("".join(chr(c) for c in vm.output))
     while not vm.halted:
         vm.output = []
-        vm.run(input()+"\n")
-        print("".join([chr(c) for c in vm.output]))
+        vm.run(input() + "\n")
+        print("".join(chr(c) for c in vm.output))
     exit()
 
 def oppositeDoor(direction):
@@ -30,7 +30,7 @@ memory = [int(i) for i in rawProgram.split(",")]
 # playGame(memory)
 
 # Items that can't (shouldn't) be picked up
-blacklist = set(["infinite loop", "molten lava", "giant electromagnet", "photons", "escape pod"])
+ignoredItems = set(["infinite loop", "molten lava", "giant electromagnet", "photons", "escape pod"])
 
 vm = VM(memory)
 vm.run()
@@ -46,12 +46,12 @@ while queue:
     inventory, path, vm = queue.popleft()
 
     # Save output and clear it
-    text = "".join([chr(c) for c in vm.output])
+    text = "".join(chr(c) for c in vm.output)
     vm.output = []
 
     # Get room name
     room = text.split("==")[1].strip()
-    # print(sum([p.split()[0] != "take" for p in path]), room, "-->", sorted(inventory))
+    # print(sum(p.split()[0] != "take" for p in path), room, "-->", sorted(inventory))
 
     # Ignore if already visited, also marks (room, inventory) as visited
     visKey = (room, tuple(sorted(inventory)))
@@ -69,7 +69,7 @@ while queue:
 
     # Pick up all items in the room
     for item in items:
-        if item in blacklist: continue # But ignore the game-ending ones
+        if item in ignoredItems: continue # But ignore the game-ending ones
         path.append("take " + item)
         vm.run("take " + item + "\n")
         inventory.add(item)
@@ -93,13 +93,13 @@ while queue:
     # Queue all next steps, copying the current VM for each one
     for door in doors:
         newVM = vm.copy()
-        newVM.run(door+"\n")
+        newVM.run(door + "\n")
 
         queue.append((set(inventory), path+[door], newVM))
 
 # Get VM at the checkpoint, list of all safe items and direction of pressure-sensitive floor
 vm, allItems, floorDirection = finalState
-vm.run("\n".join(["drop "+item for item in allItems])+"\n") # Drop all items
+vm.run("\n".join("drop "+item for item in allItems) + "\n") # Drop all items
 
 # Generate all possible item combinations by increasing length
 itemCombinations = []
@@ -113,29 +113,28 @@ for attemptItems in itemCombinations:
     # print("Trying items: {}".format(list(attemptItems)))
 
     # If inventory is a superset of any of tooHeavy, then it's also going to be too heavy
-    if any([set(s).issubset(set(attemptItems)) for s in tooHeavy]): continue
+    if any(set(s).issubset(set(attemptItems)) for s in tooHeavy): continue
 
     # Drop all items that aren't in attemptItems
     toDrop = [item for item in inventory if item not in attemptItems]
-    vm.run("\n".join(["drop "+item for item in toDrop])+"\n")
+    vm.run("\n".join("drop "+item for item in toDrop) + "\n")
     inventory = inventory.difference(set(toDrop))
 
     # Pick up all from attemptItems that aren't yet in inventory
     toPick = [item for item in attemptItems if item not in inventory]
-    vm.run("\n".join(["take "+item for item in toPick])+"\n")
+    vm.run("\n".join("take "+item for item in toPick) + "\n")
     inventory = inventory.union(set(toPick))
 
     # Activate floor
     vm.run(floorDirection+"\n")
 
-    text = "".join([chr(c) for c in vm.output])
+    text = "".join(chr(c) for c in vm.output)
     vm.output = []
 
     # Verify result
     if text.find("Alert!") == -1:
         # print(text.split("\n\n")[-1].strip())
         print("Part 1: {}".format(text.split()[-8]))
-        done = True
         break
     elif text.find("lighter") != -1: # Too heavy, add as invalid subset
         tooHeavy.append(attemptItems)

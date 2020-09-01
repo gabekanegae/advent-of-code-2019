@@ -8,12 +8,13 @@ def makeFuel(recipes, fuelAmt):
     need = {"FUEL": fuelAmt}
     have = dict()
 
-    while any([n != "ORE" for n in need.keys()]):
+    # Use need.keys() instead of need to iterate on a copy
+    while any(n != "ORE" for n in need.keys()):
         for k in [n for n in need.keys() if n != "ORE"]:
             resultAmt, inputs = recipes[k]
 
-            div = need[k]//resultAmt
-            mod = need[k]%resultAmt
+            div = need[k] // resultAmt
+            mod = need[k] % resultAmt
             
             need.pop(k) # Will produce enough units of k
             
@@ -51,7 +52,7 @@ print("Part 1: {}".format(makeFuel(recipes, 1)))
 # Binary Search
 lo, hi = 1, 10**9
 while hi > lo+1:
-    mid = (hi+lo)//2
+    mid = (hi+lo) // 2
     if makeFuel(recipes, mid) > 10**12:
         hi = mid
     else:

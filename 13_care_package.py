@@ -16,6 +16,7 @@ def drawScreen(blocks):
                 block = 0
             print(blocksArt[block]*2, end="")
         print()
+
     print("Score: {}".format(score))
     # input()
 
@@ -26,7 +27,8 @@ memory = [int(i) for i in rawProgram.split(",")]
 
 vm = VM(memory)
 vm.run()
-blocksAmt = sum([vm.output[b] == 2 for b in range(2, len(vm.output), 3)])
+
+blocksAmt = vm.output[2:len(vm.output):3].count(2)
 print("Part 1: {}".format(blocksAmt))
 
 movement = 0

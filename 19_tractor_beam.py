@@ -9,6 +9,7 @@ from collections import deque
 def check(memory, x, y):
     vm = VM(memory)
     vm.run([x, y])
+
     return vm.output[-1]
 
 ################################
@@ -28,10 +29,10 @@ for y in range(50):
             ones += 1
         else:
             # Assumes that there won't be 1s after...
-            if ones > 0: # 10
+            if ones > 0: # "10"
                 total += ones
                 break
-            else: # 00000
+            else: # "00000"
                 zeros += 1
                 if zeros > 5: break
 
@@ -42,10 +43,10 @@ x0 = 0
 for y in range(100, 10000): # Skip first 100 lines
     if result: break
     for x in range(x0, 10000):
-        # Go along bottom edge of beam (square bottom-left)
+        # Go along bottom edge of beam (bottom-left square)
         if check(memory, x, y) == 1:
-            if check(memory, x+99, y-99) == 1: # Check square top-right
-                result = 10000*x+(y-99) # Result is square top-left
+            if check(memory, x+99, y-99) == 1: # Check top-right square
+                result = 10000*x+(y-99) # Result is top-left square
             x0 = x
             break
 

@@ -33,7 +33,7 @@ for phase in permutations([5, 6, 7, 8, 9]):
     for i in range(5): # Send phase setting, does not expect any output
         vms[i].run(phase[i])
 
-    while not any([vm.halted for vm in vms]):
+    while not any(vm.halted for vm in vms):
         for i in range(5): # Run each of the amps in order
             vms[i].run(vmOutputs[(i-1)%5])
             signal = vms[i].output[-1]

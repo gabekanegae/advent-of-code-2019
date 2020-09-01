@@ -27,7 +27,7 @@ class BotCam:
 
         return total
 
-    def __rotate(self, direction):
+    def _rotate(self, direction):
         faces = "^>v<"
         if direction == "R":
             newFace = (faces.index(self.botFacing)+1) % len(faces)
@@ -40,8 +40,14 @@ class BotCam:
 
         path = []
         while True:
-            nxtTile = {"fwd": moves[self.botFacing], "left": moves[self.__rotate("L")], "right": moves[self.__rotate("R")]}
-            nxtStep = {"fwd": None, "left": None, "right": None}
+            nxtTile = {"fwd": moves[self.botFacing],
+                       "left": moves[self._rotate("L")],
+                       "right": moves[self._rotate("R")]}
+            
+            nxtStep = {"fwd": None,
+                       "left": None,
+                       "right": None}
+            
             for k, v in nxtTile.items():
                 if not (0 <= self.botPos[0]+v[0] < self.size[0]): continue
                 if not (0 <= self.botPos[1]+v[1] < self.size[1]): continue
@@ -54,11 +60,11 @@ class BotCam:
                 path[-1] += 1
             elif nxtStep["left"]:
                 self.botPos = nxtStep["left"]
-                self.botFacing = self.__rotate("L")
+                self.botFacing = self._rotate("L")
                 path += ["L", 1]
             elif nxtStep["right"]:
                 self.botPos = nxtStep["right"]
-                self.botFacing = self.__rotate("R")
+                self.botFacing = self._rotate("R")
                 path += ["R", 1]
             else:
                 return path
@@ -69,10 +75,11 @@ class BotCam:
     #         s += "".join(line) + "\n"
     #     return s
 
-def formatInput(s): return ",".join([str(c) for c in s])
+def formatInput(s): return ",".join(str(c) for c in s)
 
 def findAndReplace(l, f, r):
     nl = []
+    
     i = 0
     while i < len(l):
         if l[i:i+len(f)] == f:
@@ -81,6 +88,7 @@ def findAndReplace(l, f, r):
         else:
             nl.append(l[i])
             i += 1
+
     return nl
 
 def compressPath(path):
@@ -91,7 +99,7 @@ def compressPath(path):
         # If we have three functions, do not recurse anymore
         if len(funcs) == 3:
             # If main is short enough and fully compressed, return answer
-            if len(formatInput(main)) <= 20 and all([c in funcNames for c in main]):
+            if len(formatInput(main)) <= 20 and all(c in funcNames for c in main):
                 main = formatInput(main)
                 A, B, C = [formatInput(f) for f in funcs]
                 return main, A, B, C
@@ -110,7 +118,7 @@ def compressPath(path):
             # If the element is a function, then this is invalid 
             if newElement in funcNames: break
 
-            curFunc += [newElement]
+            curFunc.append(newElement)
             curPos += 1
 
             # If formatted function is longer than 20, also invalid
@@ -134,7 +142,7 @@ memory = [int(i) for i in rawProgram.split(",")]
 
 vm = VM(memory)
 vm.run()
-cam = "".join([chr(c) for c in vm.output]).split()
+cam = "".join(chr(c) for c in vm.output).split()
 
 botcam = BotCam(cam)
 print("Part 1: {}".format(botcam.sumIntersections()))
@@ -145,7 +153,7 @@ videoFeed = "n"
 
 vm = VM(memory)
 vm[0] = 2
-vm.run("\n".join([main, A, B, C, videoFeed])+"\n")
+vm.run("\n".join([main, A, B, C, videoFeed]) + "\n")
 print("Part 2: {}".format(vm.output[-1]))
 
 AOCUtils.printTimeTaken()

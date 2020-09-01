@@ -18,12 +18,15 @@ print("Part 1: {}".format(vm[0]))
 found = False
 for noun in range(100):
     if found: break
+    
     for verb in range(100):
         vm = VM(memory)
         vm[1], vm[2] = noun, verb
+        
         vm.run()
+
         if vm[0] == 19690720:
-            print("Part 2: {}".format(100*noun+verb))
+            print("Part 2: {}".format(100*noun + verb))
             found = True
             break
 
