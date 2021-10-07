@@ -11,9 +11,6 @@ from itertools import permutations
 rawProgram = AOCUtils.loadInput(7)
 memory = [int(i) for i in rawProgram.split(",")]
 
-vm = VM(memory)
-vm.run(1)
-
 thrusterSignals = dict()
 for phase in permutations([0, 1, 2, 3, 4]):
     signal = 0
@@ -21,6 +18,7 @@ for phase in permutations([0, 1, 2, 3, 4]):
         vm = VM(memory)
         vm.run([phase[i], signal])
         signal = vm.output[0]
+
     thrusterSignals[phase] = signal
 
 print("Part 1: {}".format(max(thrusterSignals.values())))
